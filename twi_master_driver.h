@@ -20,7 +20,7 @@ typedef enum TWIM_RESULT_enum {
 
 
 #define TWIM_WRITE_BUFFER_SIZE         8
-#define TWIM_READ_BUFFER_SIZE          (32 * ((16 / 8) * 3))
+#define TWIM_READ_BUFFER_SIZE          16
 
 
 typedef struct TWI_Master {

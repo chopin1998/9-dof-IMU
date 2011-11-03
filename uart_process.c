@@ -103,14 +103,14 @@ void uart_process_lb_bt(void)
     }
     else if ( !strcmp(para_head->para, "gyro") )
     {
-        if ( !strcmp(para_head->next->para, "readreg" ) )
+        if ( !strcmp(para_head->next->para, "readreg") )
         {
             if (p_count == 3)
             {
                 unsigned char reg;
                 
                 hexed_to_plain(para_head->next->next->para, &reg);
-                printf("reg(0x%02x): 0x%02x\n", reg, imu_gyro_read_reg(reg));
+                printf("reg(0x%02x): 0x%02x\n", reg, imu_read_reg(IMU_GYRO_ADDR, reg));
             }
         }
         else if ( !strcmp(para_head->next->para, "writereg") )
@@ -122,7 +122,7 @@ void uart_process_lb_bt(void)
                 hexed_to_plain(para_head->next->next->para, &reg);
                 hexed_to_plain(para_head->next->next->next->para, &val);
 
-                imu_gyro_write_reg(reg, val);
+                imu_write_reg(IMU_GYRO_ADDR, reg, val);
                 printf("write reg(0x%02x) to 0x%02x\n", reg, val);
             }
         }
@@ -136,7 +136,7 @@ void uart_process_lb_bt(void)
         else if ( !strcmp(para_head->next->para, "temp") )
         {
             // printf("temp: %d\n", imu_gyro_temp());
-            printf("temp: %d\n", imu_gyro_read_reg(IMU_GYRO_TEMP));
+            printf("temp: %d\n", imu_read_reg(IMU_GYRO_ADDR, IMU_GYRO_TEMP));
         }
         else if ( !strcmp(para_head->next->para, "power") )
         {
@@ -178,6 +178,32 @@ void uart_process_lb_bt(void)
         }
         else
         {
+        }
+    }
+    else if ( !strcmp(para_head->para, "accl") )
+    {
+        if ( !strcmp(para_head->next->para, "readreg") )
+        {
+            if (p_count == 3)
+            {
+                unsigned char reg;
+                
+                hexed_to_plain(para_head->next->next->para, &reg);
+                printf("reg(0x%02x): 0x%02x\n", reg, imu_read_reg(IMU_ACCL_ADDR, reg));
+            }
+        }
+    }
+    else if ( !strcmp(para_head->para, "magn") )
+    {
+        if ( !strcmp(para_head->next->para, "readreg") )
+        {
+            if (p_count == 3)
+            {
+                unsigned char reg;
+                
+                hexed_to_plain(para_head->next->next->para, &reg);
+                printf("reg(0x%02x): 0x%02x\n", reg, imu_read_reg(IMU_MAGN_ADDR, reg));
+            }
         }
     }
     else

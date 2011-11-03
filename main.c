@@ -128,14 +128,13 @@ int main(void)
         if (gyro_updated)
         {
             static unsigned char count = 0;
-            count++;
+            IMU_GYRO_RESULT_t rev;
             
             gyro_updated = 0;
-            IMU_GYRO_RESULT_t rev;
 
             imu_gyro_read(&rev);
 
-
+            count++;
             printf("%d|%d|%d|%d\n", count, rev.x, rev.y, rev.z);
         }
 
