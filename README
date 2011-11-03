@@ -1,0 +1,11 @@
+sensor:
+	L3G4200D	3-axis gyroscope
+	LSM303DLH	3-axis accelerometer and 3-axis magnetometer
+
+
+mcu:
+	xmega128a1 on xplained board
+
+
+stage 1:
+	xmega just read the sensors output and dump data via serial port, software on pc side will process the information
