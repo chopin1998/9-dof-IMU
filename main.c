@@ -35,14 +35,14 @@ void init_io(void)
 
 
     PORTF.DIRCLR = PIN4_bm;     /* gyro int */
-    PORTF.INT0MASK = PIN4_bm;
+    PORTF.INT0MASK |= PIN4_bm;
     PORTF.PIN4CTRL |= PORT_ISC_RISING_gc | PORT_OPC_PULLDOWN_gc;
-    PORTF.INTCTRL = PORT_INT0LVL_LO_gc;
+    PORTF.INTCTRL |= PORT_INT0LVL_LO_gc;
 
     PORTF.DIRCLR = PIN5_bm;      /* accl int */
-    PORTF.INT1MASK = PIN5_bm;
+    PORTF.INT1MASK |= PIN5_bm;
     PORTF.PIN5CTRL |= PORT_ISC_RISING_gc | PORT_OPC_PULLDOWN_gc;
-    PORTF.INTCTRL = PORT_INT1LVL_LO_gc;
+    PORTF.INTCTRL |= PORT_INT1LVL_LO_gc;
 
     
     // PORTC.DIRSET = PIN7_bm;
