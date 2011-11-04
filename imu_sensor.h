@@ -46,7 +46,7 @@
 #define IMU_ACCL_CTRL3    0x22
 #define IMU_ACCL_CTRL4    0x23
 #define IMU_ACCL_CTRL5    0x24
-#define IMU_ACCL_HPF      0x25
+#define IMU_ACCL_HPF_RST  0x25
 #define IMU_ACCL_REF      0x26
 #define IMU_ACCL_STATUS   0x27
 #define IMU_ACCL_OUT_X_L  0x28
@@ -65,18 +65,17 @@
 #define IMU_ACCL_INT2_DURATION 0x37
 
 
-
 /* MAGN REGISTER MAP */
 #define IMU_MAGN_CRA      0x00
 #define IMU_MAGN_CRB      0x01
-#define IMU_MAGN_MR       0x02
+#define IMU_MAGN_MODE     0x02
 #define IMU_MAGN_OUT_X_H  0x03
 #define IMU_MAGN_OUT_X_L  0x04
 #define IMU_MAGN_OUT_Y_H  0x05
 #define IMU_MAGN_OUT_Y_L  0x06
 #define IMU_MAGN_OUT_Z_H  0x07
 #define IMU_MAGN_OUT_Z_L  0x08
-#define IMU_MAGN_SR       0x09
+#define IMU_MAGN_STATUS   0x09
 #define IMU_MAGN_IRA      0x0a
 #define IMU_MAGN_IRB      0x0b
 #define IMU_MAGN_IRC      0x0c
@@ -88,8 +87,12 @@ enum { IMU_GYRO_POWER_ON,
        IMU_GYRO_POWER_OFF,
 };
 
+enum { IMU_ACCL_POWER_ON,
+       IMU_ACCL_POWER_OFF,
+};
 
-typedef struct IMU_GYRO_RESULT
+
+typedef struct
 {
     /*
     unsigned char x_l;
@@ -104,6 +107,11 @@ typedef struct IMU_GYRO_RESULT
     signed short z;
 } IMU_GYRO_RESULT_t;
 
+typedef struct {
+    signed short x;
+    signed short y;
+    signed short z;
+} IMU_ACCL_RESULT_t;
 
 
 void imu_init(void);
@@ -112,7 +120,11 @@ unsigned char imu_read_reg(unsigned char addr, unsigned char reg);
 unsigned char imu_write_reg(unsigned char addr, unsigned char reg, unsigned char val);
 
 void imu_gyro_power(unsigned char sel);
+unsigned char imu_gyro_read(IMU_GYRO_RESULT_t *rev);
 void imu_gyro_dump(unsigned char on);
 
+void imu_accl_power(unsigned char sel);
+unsigned char imu_accl_read(IMU_ACCL_RESULT_t *rev);
+void imu_accl_dump(unsigned char on);
 
 #endif

@@ -5,6 +5,8 @@
 
 TWI_Master_t imu_twi;
 
+////////////////
+////////////////
 
 ISR (IMU_TWI_vect)
 {
@@ -35,7 +37,8 @@ unsigned char imu_write_reg(unsigned char part_addr, unsigned char reg, unsigned
     return 0;
 }
 
-
+////////////////
+////////////////
 
 void imu_init(void)
 {
@@ -58,8 +61,22 @@ void imu_init(void)
     imu_write_reg(IMU_GYRO_ADDR, IMU_GYRO_CTRL5, 0x13); /* HPF and LPF2 enable */
     
     imu_write_reg(IMU_GYRO_ADDR, IMU_GYRO_CTRL1, 0x60); /* power off, LPF1->54hz, LPF2->50hz, ODR->200hz */
+
+
+    ////////////////
+    ////////////////
+
+    imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL1, 0x0f); /* power off, ODR->100hz, LPF->74hz */
+    imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL2, 0x12); /* enable FDS, HPF cut-off @ 0.5hz */
+    imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL3, 0x02); /* data ready on INT1 */
+    imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL4, 0x80); /* block data update, FS = 2g */
+    imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL5, 0x00); /* disable sleep to wake */
+    imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_INT1_CFG, 0x00); /* 6 direction movement */
 }
 
+
+////////////////
+////////////////
 
 unsigned char imu_gyro_read(IMU_GYRO_RESULT_t *rev)
 {
@@ -113,7 +130,7 @@ void imu_gyro_dump(unsigned char on)
     if (on)
     {
         imu_gyro_power(IMU_GYRO_POWER_ON);
-        _delay_ms(100);
+        _delay_ms(1);
         
         imu_write_reg(IMU_GYRO_ADDR, IMU_GYRO_CTRL3, 0x08);
     }
@@ -125,3 +142,55 @@ void imu_gyro_dump(unsigned char on)
     }
 }
 
+
+////////////////
+////////////////
+
+void imu_accl_power(unsigned char sel)
+{
+    unsigned char oldval = imu_read_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL1);
+    
+    if (sel == IMU_GYRO_POWER_ON)
+    {
+        imu_write_reg(IMU_ACCL_ADDR, IMU_GYRO_CTRL1, (oldval & 0x1f) | 0x20);
+    }
+    else
+    {
+        imu_write_reg(IMU_ACCL_ADDR, IMU_GYRO_CTRL1, oldval & 0x1f);
+    }
+}
+
+unsigned char imu_accl_read(IMU_ACCL_RESULT_t *rev)
+{
+    unsigned char tmp;
+    unsigned char *p = (unsigned char *)(rev);
+    
+    for (unsigned char i=0; i<6; i++)
+    {
+        tmp = imu_read_reg(IMU_ACCL_ADDR, IMU_ACCL_OUT_X_L + i);
+        // printf("%d, ", tmp);
+        
+        *p = tmp;
+        p++;
+    }
+    // printf("\n");
+
+    return 0;
+}
+
+void imu_accl_dump(unsigned char on)
+{
+    if (on)
+    {
+        imu_accl_power(IMU_ACCL_POWER_ON);
+        _delay_ms(1);
+        
+        imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_INT1_CFG, 0x40);
+    }
+    else
+    {
+        imu_write_reg(IMU_GYRO_ADDR, IMU_ACCL_INT1_CFG, 0x00);
+
+        imu_accl_power(IMU_ACCL_POWER_OFF);
+    }
+}

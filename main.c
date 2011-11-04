@@ -6,48 +6,45 @@
 #include "imu_sensor.h"
 
 
-
-
 extern volatile unsigned char rtc_flag;
-volatile unsigned char gyro_updated = 0;
+volatile unsigned char gyro_updated=0, accl_updated=0, magn_update=0;
 
 
-ISR (PORTD_INT0_vect)
-{
-    static unsigned char count = 0;
-    
-    PORTD.INTFLAGS = 0x00;
-
-    PORTE.OUTTGL = PIN6_bm;    
-}
 
 ISR (PORTF_INT0_vect)
 {
-    PORTF.INTFLAGS = 0x00;
-
-    PORTE.OUTTGL = PIN5_bm;
+    PORTE.OUTTGL = PIN6_bm;
 
     gyro_updated++;
 }
 
+ISR (PORTF_INT1_vect)
+{
+    PORTE.OUTTGL = PIN5_bm;
+
+    accl_updated++;
+}
+
 void init_io(void)
 {
-    PORTE.DIRSET = 0xff;
+    PORTE.DIRSET = 0xff;        /* LED port */
     PORTE.OUT = 0xff;
-    PORTF.DIRSET = PIN3_bm;
-    PORTF.DIRCLR = PIN2_bm;
-
     
-    PORTD.DIRCLR = PIN0_bm;
-    PORTD.INT0MASK = PIN0_bm;
-    PORTD.PIN0CTRL |= PORT_ISC_FALLING_gc | PORT_OPC_PULLUP_gc;
-    PORTD.INTCTRL = PORT_INT0LVL_LO_gc;
+    PORTF.DIRSET = PIN3_bm;     /* serial tx pin */
+    PORTF.DIRCLR = PIN2_bm;     /* serial rx pin */
 
-    PORTF.DIRCLR = PIN4_bm;
+
+    PORTF.DIRCLR = PIN4_bm;     /* gyro int */
     PORTF.INT0MASK = PIN4_bm;
     PORTF.PIN4CTRL |= PORT_ISC_RISING_gc | PORT_OPC_PULLDOWN_gc;
     PORTF.INTCTRL = PORT_INT0LVL_LO_gc;
 
+    PORTF.DIRCLR = PIN5_bm;      /* accl int */
+    PORTF.INT1MASK = PIN5_bm;
+    PORTF.PIN5CTRL |= PORT_ISC_RISING_gc | PORT_OPC_PULLDOWN_gc;
+    PORTF.INTCTRL = PORT_INT1LVL_LO_gc;
+
+    
     // PORTC.DIRSET = PIN7_bm;
     // PORTCFG.CLKEVOUT |= PORTCFG_CLKOUT_PC7_gc;
 }
@@ -84,6 +81,10 @@ void timer_init(void)
 int main(void)
 {
     unsigned char light_count = 0;
+
+    IMU_GYRO_RESULT_t g_rev;
+    IMU_ACCL_RESULT_t a_rev;
+
     
     clock_pll_init();
     clock_rtc_init();
@@ -127,16 +128,23 @@ int main(void)
 
         if (gyro_updated)
         {
-            static unsigned char count = 0;
-            IMU_GYRO_RESULT_t rev;
-            
             gyro_updated = 0;
 
-            imu_gyro_read(&rev);
+            imu_gyro_read(&g_rev);
 
-            count++;
-            printf("%d|%d|%d|%d\n", count, rev.x, rev.y, rev.z);
+            printf("gyro:%d|%d|%d\n", g_rev.x, g_rev.y, g_rev.z);
         }
+
+        if (accl_updated)
+        {
+            accl_updated = 0;
+
+            imu_accl_read(&a_rev);
+
+            printf("accl:%d|%d|%d\n", a_rev.x, a_rev.y, a_rev.z);
+        }
+
+        _delay_us(1);
 
         if (1)
         {

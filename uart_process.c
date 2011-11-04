@@ -80,6 +80,11 @@ void uart_process_lb_bt(void)
     char *p = NULL;
     unsigned char p_count = 0;
 
+    unsigned char reg, val;
+    IMU_GYRO_RESULT_t gyro_rev;
+    IMU_ACCL_RESULT_t accl_rev;
+    unsigned char rev;
+
     para_head = (P_LIST_t *)malloc(sizeof(P_LIST_t));
 
     p = strtok(&LB_BT.buf[0], ",");
@@ -107,8 +112,6 @@ void uart_process_lb_bt(void)
         {
             if (p_count == 3)
             {
-                unsigned char reg;
-                
                 hexed_to_plain(para_head->next->next->para, &reg);
                 printf("reg(0x%02x): 0x%02x\n", reg, imu_read_reg(IMU_GYRO_ADDR, reg));
             }
@@ -117,8 +120,6 @@ void uart_process_lb_bt(void)
         {
             if (p_count == 4)
             {
-                unsigned char reg, val;
-            
                 hexed_to_plain(para_head->next->next->para, &reg);
                 hexed_to_plain(para_head->next->next->next->para, &val);
 
@@ -128,20 +129,16 @@ void uart_process_lb_bt(void)
         }
         else if ( !strcmp(para_head->next->para, "read") )
         {
-            IMU_GYRO_RESULT_t rev;
-            imu_gyro_read(&rev);
-
-            printf("x-> %d, y-> %d, z->%d\n", rev.x, rev.y, rev.z);
+            imu_gyro_read(&gyro_rev);
+            
+            printf("x-> %d, y-> %d, z->%d\n", gyro_rev.x, gyro_rev.y, gyro_rev.z);
         }
         else if ( !strcmp(para_head->next->para, "temp") )
         {
-            // printf("temp: %d\n", imu_gyro_temp());
             printf("temp: %d\n", imu_read_reg(IMU_GYRO_ADDR, IMU_GYRO_TEMP));
         }
         else if ( !strcmp(para_head->next->para, "power") )
         {
-            unsigned char rev;
-            
             if (p_count == 3)
             {
                 if ( !strcmp(para_head->next->next->para, "on") )
@@ -186,12 +183,59 @@ void uart_process_lb_bt(void)
         {
             if (p_count == 3)
             {
-                unsigned char reg;
-                
                 hexed_to_plain(para_head->next->next->para, &reg);
                 printf("reg(0x%02x): 0x%02x\n", reg, imu_read_reg(IMU_ACCL_ADDR, reg));
             }
         }
+        else if ( !strcmp(para_head->next->para, "writereg") )
+        {
+            if (p_count == 4)
+            {
+                hexed_to_plain(para_head->next->next->para, &reg);
+                hexed_to_plain(para_head->next->next->next->para, &val);
+
+                imu_write_reg(IMU_ACCL_ADDR, reg, val);
+                printf("write reg(0x%02x) to 0x%02x\n", reg, val);
+            }
+        }
+        else if ( !strcmp(para_head->next->para, "power") )
+        {
+            if (p_count == 3)
+            {
+                if ( !strcmp(para_head->next->next->para, "on") )
+                {
+                    printf("power on\n");
+                    rev = IMU_ACCL_POWER_ON;
+                }
+                else
+                {
+                    printf("power off\n");
+                    rev = IMU_ACCL_POWER_OFF;
+                }
+
+                imu_accl_power(rev);
+            }
+        }
+        else if ( !strcmp(para_head->next->para, "read") )
+        {
+            imu_accl_read(&accl_rev);
+            
+            printf("x-> %d, y-> %d, z->%d\n", accl_rev.x, accl_rev.y, accl_rev.z);
+        }
+        else if ( !strcmp(para_head->next->para, "dump") )
+        {
+            if (p_count == 2)
+            {
+                printf("start dump..\n");
+                imu_accl_dump(1);
+            }
+            else
+            {
+                printf("stop dump\n");
+                imu_accl_dump(0);
+            }
+        }
+
     }
     else if ( !strcmp(para_head->para, "magn") )
     {
@@ -199,10 +243,19 @@ void uart_process_lb_bt(void)
         {
             if (p_count == 3)
             {
-                unsigned char reg;
-                
                 hexed_to_plain(para_head->next->next->para, &reg);
                 printf("reg(0x%02x): 0x%02x\n", reg, imu_read_reg(IMU_MAGN_ADDR, reg));
+            }
+        }
+        else if ( !strcmp(para_head->next->para, "writereg") )
+        {
+            if (p_count == 4)
+            {
+                hexed_to_plain(para_head->next->next->para, &reg);
+                hexed_to_plain(para_head->next->next->next->para, &val);
+
+                imu_write_reg(IMU_MAGN_ADDR, reg, val);
+                printf("write reg(0x%02x) to 0x%02x\n", reg, val);
             }
         }
     }
