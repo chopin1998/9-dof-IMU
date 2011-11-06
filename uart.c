@@ -50,9 +50,13 @@ ISR (UART_BT_RXC_vect)
 void uart_init(USART_t *dev)
 {
     /* 115200bps @ 36Mhz */
-    int bsel = 1186;
-    unsigned char bscale = 10;
+    // int bsel = 1186;
+    // unsigned char bscale = 10;
     /* 115200bps @ 36Mhz */
+
+    // 576000bps @ 36MHz
+    int bsel = 186;
+    unsigned char bscale = 10;
     
     dev->CTRLC = USART_CHSIZE_8BIT_gc | USART_PMODE_DISABLED_gc;
 

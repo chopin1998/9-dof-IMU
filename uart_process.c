@@ -220,7 +220,7 @@ void uart_process_lb_bt(void)
         {
             imu_accl_read(&accl_rev);
             
-            printf("x-> %d, y-> %d, z->%d\n", accl_rev.x, accl_rev.y, accl_rev.z);
+            printf("x-> %d, y-> %d, z->%d\n", accl_rev.x>>4, accl_rev.y>>4, accl_rev.z>>4);
         }
         else if ( !strcmp(para_head->next->para, "dump") )
         {
@@ -235,7 +235,6 @@ void uart_process_lb_bt(void)
                 imu_accl_dump(0);
             }
         }
-
     }
     else if ( !strcmp(para_head->para, "magn") )
     {

@@ -10,18 +10,17 @@ extern volatile unsigned char rtc_flag;
 volatile unsigned char gyro_updated=0, accl_updated=0, magn_update=0;
 
 
-
 ISR (PORTF_INT0_vect)
 {
-    PORTE.OUTTGL = PIN6_bm;
+    PORTE.OUTCLR = PIN6_bm;
 
     gyro_updated++;
 }
 
 ISR (PORTF_INT1_vect)
 {
-    PORTE.OUTTGL = PIN5_bm;
-
+    PORTE.OUTCLR = PIN5_bm;
+    
     accl_updated++;
 }
 
@@ -140,12 +139,16 @@ int main(void)
             accl_updated = 0;
 
             imu_accl_read(&a_rev);
+            // imu_read_reg(IMU_ACCL_ADDR, IMU_ACCL_HPF_RST);
 
-            printf("accl:%d|%d|%d\n", a_rev.x, a_rev.y, a_rev.z);
+            printf("accl:%d|%d|%d\n", a_rev.x>>4, a_rev.y>>4, a_rev.z>>4);
         }
 
-        _delay_us(1);
-
+        if (1)
+        {
+            PORTE.OUTSET = PIN6_bm | PIN5_bm;
+        }
+        
         if (1)
         {
             uart_process_tick(&Q_BT, &LB_BT, uart_process_lb_bt, STX, ETX);

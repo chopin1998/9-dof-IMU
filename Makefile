@@ -11,7 +11,7 @@ TARGET = main
 SRC = main.c clock.c
 SRC += uart.c uart_process.c util.c twi_master_driver.c imu_sensor.c
 ASRC = 
-OPT = 2
+OPT = 3
 
 
 # Name of this Makefile (used for "make depend").

@@ -67,11 +67,14 @@ void imu_init(void)
     ////////////////
 
     imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL1, 0x0f); /* power off, ODR->100hz, LPF->74hz */
-    imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL2, 0x12); /* enable FDS, HPF cut-off @ 0.5hz */
-    imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL3, 0x02); /* data ready on INT1 */
+
+    // imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL2, 0x12); /* enable FDS, HPF cut-off @ 0.5hz */
+    imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL2, 0x00); /* disable FDS */
+    
+    imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL3, 0x00); /* data ready on INT1 */
     imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL4, 0x80); /* block data update, FS = 2g */
     imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL5, 0x00); /* disable sleep to wake */
-    imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_INT1_CFG, 0x00); /* 6 direction movement */
+    imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_INT1_CFG, 0x40); /* 6 direction movement */
 }
 
 
@@ -185,12 +188,13 @@ void imu_accl_dump(unsigned char on)
         imu_accl_power(IMU_ACCL_POWER_ON);
         _delay_ms(1);
         
-        imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_INT1_CFG, 0x40);
+        imu_write_reg(IMU_ACCL_ADDR, IMU_ACCL_CTRL3, 0x02);
     }
     else
     {
-        imu_write_reg(IMU_GYRO_ADDR, IMU_ACCL_INT1_CFG, 0x00);
+        imu_write_reg(IMU_GYRO_ADDR, IMU_ACCL_CTRL3, 0x00);
 
         imu_accl_power(IMU_ACCL_POWER_OFF);
     }
 }
+

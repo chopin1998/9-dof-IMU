@@ -4,9 +4,18 @@ import serial
 import Gnuplot
 import numpy
 import time
+import atexit
 
-dev = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
+def close_dump():
+    print 'close dump'
+    dev.write('[accl,dump,0]')
+
+atexit.register(close_dump)
+
+dev = serial.Serial('/dev/ttyUSB0', 576000, timeout=1)
 time.sleep(0.5)
+dev.write('[accl,dump]')
+
 dev.flush()
 
 start_time = time.time()
@@ -15,7 +24,7 @@ g.xlabel('time')
 g.ylabel('data')
 
 PARA_NUM = 4
-plot_data = numpy.zeros((275, PARA_NUM))
+plot_data = numpy.zeros((32, PARA_NUM))
 
 timebase = 0.0
 while True:
@@ -28,16 +37,16 @@ while True:
 
     #print repr(new_data)
     try:
-        new_data = map(float, raw.split('|'))
-        new_data = [new_data[0]] + [new_data[1] - new_data[2]] + new_data[3:]
-        print raw
-    except:
-        # print '!!!!!!!!!!!!!!!! error data'
+        new_data = raw.split(':')[1]
+        #new_data = new_data.split('|')
+        new_data = map(int, new_data.split('|'))
+    except Exception ,ex:
+        print '!!!!!!!!!!!!!!!! error data', raw, ex
         continue
         
-    if len(new_data) == PARA_NUM:
-        timebase += new_data[0] / 1000
-        new_data[0] = timebase
+    if len(new_data) == PARA_NUM-1:
+        timebase += 0.01
+        new_data.insert(0, timebase)
     else:
         print 'PARA_NUM failed'
         continue
@@ -55,5 +64,5 @@ while True:
     #plot_1 = Gnuplot.Data(plot_data, with_='lines', using='1:2')
     #plot_2 = Gnuplot.Data(plot_data, with_='lines', using='1:3')
     #g.plot(plot_1, plot_2)
-    
+
 raw_input()
