@@ -4,8 +4,8 @@
 #include "common.h"
 
 
-#define UART_BT_RXC_vect    USARTF0_RXC_vect
-#define UART_BT   USARTF0
+#define UART_BT_RXC_vect    USARTD0_RXC_vect
+#define UART_BT   USARTD0
 
 
 #define UART_RAW_RXBUF_MAX 512

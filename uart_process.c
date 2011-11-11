@@ -3,6 +3,7 @@
 #include "uart_process.h"
 #include "util.h"
 #include "imu_sensor.h"
+#include "qd.h"
 
 
 void uart_process_init_linebuf(LINE_BUF_t *lb)
@@ -256,6 +257,18 @@ void uart_process_lb_bt(void)
                 imu_write_reg(IMU_MAGN_ADDR, reg, val);
                 printf("write reg(0x%02x) to 0x%02x\n", reg, val);
             }
+        }
+    }
+    else if ( !strcmp(para_head->para, "qd") )
+    {
+        if ( !strcmp(para_head->next->para, "read") )
+        {
+            printf("qd: %d\n", QD_READ());
+        }
+        else if ( !strcmp(para_head->next->para, "clear") )
+        {
+            QD_CLEAR();
+            printf("qd cleaned\n");
         }
     }
     else

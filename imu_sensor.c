@@ -4,9 +4,26 @@
 
 
 TWI_Master_t imu_twi;
+volatile unsigned char accl_updated=0, gyro_updated=0;
 
 ////////////////
 ////////////////
+
+
+ISR (PORTF_INT0_vect)
+{
+    PORTA.OUTCLR = PIN6_bm;
+    
+    gyro_updated++;
+}
+
+ISR (PORTF_INT1_vect)
+{
+    PORTA.OUTCLR = PIN7_bm;
+
+    accl_updated++;
+}
+
 
 ISR (IMU_TWI_vect)
 {

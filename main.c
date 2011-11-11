@@ -4,33 +4,22 @@
 #include "clock.h"
 #include "uart_process.h"
 #include "imu_sensor.h"
-
+#include "qd.h"
 
 extern volatile unsigned char rtc_flag;
-volatile unsigned char gyro_updated=0, accl_updated=0, magn_update=0;
+extern volatile unsigned char accl_updated, gyro_updated;
 
-
-ISR (PORTF_INT0_vect)
-{
-    PORTE.OUTCLR = PIN6_bm;
-
-    gyro_updated++;
-}
-
-ISR (PORTF_INT1_vect)
-{
-    PORTE.OUTCLR = PIN5_bm;
-    
-    accl_updated++;
-}
 
 void init_io(void)
 {
-    PORTE.DIRSET = 0xff;        /* LED port */
-    PORTE.OUT = 0xff;
+    // PORTE.DIRSET = 0xff;        /* LED port */
+    // PORTE.OUT = 0xff;
+    PORTA.DIRSET = PIN6_bm | PIN7_bm; /* LED pins */
     
-    PORTF.DIRSET = PIN3_bm;     /* serial tx pin */
-    PORTF.DIRCLR = PIN2_bm;     /* serial rx pin */
+    PORTD.DIRSET = PIN3_bm;     /* serial tx pin */
+    PORTD.DIRCLR = PIN2_bm;     /* serial rx pin */
+    
+    PORTD.DIRCLR = PIN0_bm | PIN1_bm;
 
 
     PORTF.DIRCLR = PIN4_bm;     /* gyro int */
@@ -92,18 +81,21 @@ int main(void)
     init_uart();
     timer_init();
 
+    /*
     PR.PRGEN = PR_AES_bm | PR_EBI_bm | PR_EVSYS_bm | PR_DMA_bm;
     PR.PRPA = PR_DAC_bm | PR_ADC_bm | PR_AC_bm;
     PR.PRPB = PR_DAC_bm | PR_ADC_bm | PR_AC_bm;
-
+    
     PR.PRPC = PR_TWI_bm | PR_SPI_bm | PR_HIRES_bm | PR_TC1_bm | PR_TC0_bm;
     PR.PRPD = PR_TWI_bm | PR_SPI_bm | PR_HIRES_bm | PR_TC1_bm | PR_TC0_bm;
     PR.PRPE = PR_TWI_bm | PR_SPI_bm | PR_HIRES_bm | PR_TC1_bm | PR_TC0_bm;
     PR.PRPF = PR_SPI_bm | PR_HIRES_bm | PR_TC1_bm | PR_TC0_bm;
-        
+    */
 
     PMIC.CTRL |= PMIC_LOLVLEX_bm | PMIC_RREN_bm;
     sei();
+
+    qd_init();
     
     imu_init();
     _delay_ms(200);
@@ -141,7 +133,7 @@ int main(void)
             imu_accl_read(&a_rev);
             // imu_read_reg(IMU_ACCL_ADDR, IMU_ACCL_HPF_RST);
 
-            printf("accl:%d|%d|%d\n", a_rev.x>>4, a_rev.y>>4, a_rev.z>>4);
+            printf("accl:%d|%d|%d|%d\n", a_rev.x>>4, a_rev.y>>4, a_rev.z>>4, QD_READ());
         }
 
         if (1)
