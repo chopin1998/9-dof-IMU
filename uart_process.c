@@ -83,7 +83,7 @@ void uart_process_lb_bt(void)
 
     unsigned char reg, val;
     IMU_GYRO_RESULT_t gyro_rev;
-    IMU_ACCL_RESULT_t accl_rev;
+    IMU_ACCEL_RESULT_t accel_rev;
     unsigned char rev;
 
     para_head = (P_LIST_t *)malloc(sizeof(P_LIST_t));
@@ -178,14 +178,14 @@ void uart_process_lb_bt(void)
         {
         }
     }
-    else if ( !strcmp(para_head->para, "accl") )
+    else if ( !strcmp(para_head->para, "accel") )
     {
         if ( !strcmp(para_head->next->para, "readreg") )
         {
             if (p_count == 3)
             {
                 hexed_to_plain(para_head->next->next->para, &reg);
-                printf("reg(0x%02x): 0x%02x\n", reg, imu_read_reg(IMU_ACCL_ADDR, reg));
+                printf("reg(0x%02x): 0x%02x\n", reg, imu_read_reg(IMU_ACCEL_ADDR, reg));
             }
         }
         else if ( !strcmp(para_head->next->para, "writereg") )
@@ -195,7 +195,7 @@ void uart_process_lb_bt(void)
                 hexed_to_plain(para_head->next->next->para, &reg);
                 hexed_to_plain(para_head->next->next->next->para, &val);
 
-                imu_write_reg(IMU_ACCL_ADDR, reg, val);
+                imu_write_reg(IMU_ACCEL_ADDR, reg, val);
                 printf("write reg(0x%02x) to 0x%02x\n", reg, val);
             }
         }
@@ -206,34 +206,34 @@ void uart_process_lb_bt(void)
                 if ( !strcmp(para_head->next->next->para, "on") )
                 {
                     printf("power on\n");
-                    rev = IMU_ACCL_POWER_ON;
+                    rev = IMU_ACCEL_POWER_ON;
                 }
                 else
                 {
                     printf("power off\n");
-                    rev = IMU_ACCL_POWER_OFF;
+                    rev = IMU_ACCEL_POWER_OFF;
                 }
 
-                imu_accl_power(rev);
+                imu_accel_power(rev);
             }
         }
         else if ( !strcmp(para_head->next->para, "read") )
         {
-            imu_accl_read(&accl_rev);
+            imu_accel_read(&accel_rev);
             
-            printf("x-> %d, y-> %d, z->%d\n", accl_rev.x>>4, accl_rev.y>>4, accl_rev.z>>4);
+            printf("x-> %d, y-> %d, z->%d\n", accel_rev.x>>4, accel_rev.y>>4, accel_rev.z>>4);
         }
         else if ( !strcmp(para_head->next->para, "dump") )
         {
             if (p_count == 2)
             {
                 printf("start dump..\n");
-                imu_accl_dump(1);
+                imu_accel_dump(1);
             }
             else
             {
                 printf("stop dump\n");
-                imu_accl_dump(0);
+                imu_accel_dump(0);
             }
         }
     }

@@ -6,7 +6,7 @@
 #define IMU_TWI_vect    TWIF_TWIM_vect
 
 #define IMU_GYRO_ADDR   0x69
-#define IMU_ACCL_ADDR   0x18
+#define IMU_ACCEL_ADDR   0x18
 #define IMU_MAGN_ADDR   0x1e
 
 
@@ -40,29 +40,29 @@
 #define IMU_GYRO_INT1_DURATION 0x38
 
 
-/* ACCL REGISTER MAP */
-#define IMU_ACCL_CTRL1    0x20
-#define IMU_ACCL_CTRL2    0x21
-#define IMU_ACCL_CTRL3    0x22
-#define IMU_ACCL_CTRL4    0x23
-#define IMU_ACCL_CTRL5    0x24
-#define IMU_ACCL_HPF_RST  0x25
-#define IMU_ACCL_REF      0x26
-#define IMU_ACCL_STATUS   0x27
-#define IMU_ACCL_OUT_X_L  0x28
-#define IMU_ACCL_OUT_X_H  0x29
-#define IMU_ACCL_OUT_Y_L  0x2a
-#define IMU_ACCL_OUT_Y_H  0x2b
-#define IMU_ACCL_OUT_Z_L  0x2c
-#define IMU_ACCL_OUT_Z_H  0x2d
-#define IMU_ACCL_INT1_CFG 0x30
-#define IMU_ACCL_INT1_SRC 0x31
-#define IMU_ACCL_INT1_THS 0x32
-#define IMU_ACCL_INT1_DURATION 0x33
-#define IMU_ACCL_INT2_CFG 0x34
-#define IMU_ACCL_INT2_SRC 0x35
-#define IMU_ACCL_INT2_THS 0x36
-#define IMU_ACCL_INT2_DURATION 0x37
+/* ACCEL REGISTER MAP */
+#define IMU_ACCEL_CTRL1    0x20
+#define IMU_ACCEL_CTRL2    0x21
+#define IMU_ACCEL_CTRL3    0x22
+#define IMU_ACCEL_CTRL4    0x23
+#define IMU_ACCEL_CTRL5    0x24
+#define IMU_ACCEL_HPF_RST  0x25
+#define IMU_ACCEL_REF      0x26
+#define IMU_ACCEL_STATUS   0x27
+#define IMU_ACCEL_OUT_X_L  0x28
+#define IMU_ACCEL_OUT_X_H  0x29
+#define IMU_ACCEL_OUT_Y_L  0x2a
+#define IMU_ACCEL_OUT_Y_H  0x2b
+#define IMU_ACCEL_OUT_Z_L  0x2c
+#define IMU_ACCEL_OUT_Z_H  0x2d
+#define IMU_ACCEL_INT1_CFG 0x30
+#define IMU_ACCEL_INT1_SRC 0x31
+#define IMU_ACCEL_INT1_THS 0x32
+#define IMU_ACCEL_INT1_DURATION 0x33
+#define IMU_ACCEL_INT2_CFG 0x34
+#define IMU_ACCEL_INT2_SRC 0x35
+#define IMU_ACCEL_INT2_THS 0x36
+#define IMU_ACCEL_INT2_DURATION 0x37
 
 
 /* MAGN REGISTER MAP */
@@ -87,8 +87,8 @@ enum { IMU_GYRO_POWER_ON,
        IMU_GYRO_POWER_OFF,
 };
 
-enum { IMU_ACCL_POWER_ON,
-       IMU_ACCL_POWER_OFF,
+enum { IMU_ACCEL_POWER_ON,
+       IMU_ACCEL_POWER_OFF,
 };
 
 
@@ -111,7 +111,7 @@ typedef struct {
     signed short x;
     signed short y;
     signed short z;
-} IMU_ACCL_RESULT_t;
+} IMU_ACCEL_RESULT_t;
 
 
 void imu_init(void);
@@ -123,8 +123,8 @@ void imu_gyro_power(unsigned char sel);
 unsigned char imu_gyro_read(IMU_GYRO_RESULT_t *rev);
 void imu_gyro_dump(unsigned char on);
 
-void imu_accl_power(unsigned char sel);
-unsigned char imu_accl_read(IMU_ACCL_RESULT_t *rev);
-void imu_accl_dump(unsigned char on);
+void imu_accel_power(unsigned char sel);
+unsigned char imu_accel_read(IMU_ACCEL_RESULT_t *rev);
+void imu_accel_dump(unsigned char on);
 
 #endif

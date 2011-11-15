@@ -5,9 +5,53 @@
 #include "uart_process.h"
 #include "imu_sensor.h"
 #include "qd.h"
+#include "tilt.h"
+
+#define DEG_RAD_OP (3.14159265359 / 180.0)
+
+float gyro_x, gyro_y, gyro_z;
+float accel_x, accel_y, accel_z;
+
+float roll, pitch, yaw;
+float roll_rate, pitch_rate, yaw_rate;
+// float roll_est, pitch_est, yaw_est;
+
+// Tilt state structures.
+tilt roll_tilt_state, pitch_tilt_state, yaw_tilt_state;
+
 
 extern volatile unsigned char rtc_flag;
-extern volatile unsigned char accl_updated, gyro_updated;
+extern volatile unsigned char accel_updated, gyro_updated;
+
+
+void imu_filter(IMU_GYRO_RESULT_t* g_rev, IMU_ACCEL_RESULT_t* a_rev)
+{
+    float roll_est, pitch_est, yaw_est;
+    
+    roll = atan2(a_rev->y, a_rev->z);
+    pitch = atan2(a_rev->x, a_rev->z);
+    yaw = atan2(a_rev->x, a_rev->y);
+
+    
+    roll_rate = g_rev->x * DEG_RAD_OP;
+    pitch_rate = g_rev->y * DEG_RAD_OP;
+    yaw_rate = g_rev->z * DEG_RAD_OP;
+
+    
+    tilt_state_update(&roll_tilt_state, roll_rate);
+    tilt_kalman_update(&roll_tilt_state, roll);
+    roll_est = tilt_get_angle(&roll_tilt_state);
+
+    tilt_state_update(&pitch_tilt_state, pitch_rate);
+    tilt_kalman_update(&pitch_tilt_state, pitch);
+    pitch_est = tilt_get_angle(&pitch_tilt_state);
+
+    tilt_state_update(&yaw_tilt_state, yaw_rate);
+    tilt_kalman_update(&yaw_tilt_state, yaw);
+    // yaw_est = tilt_get_angle(&yaw_tilt_state);
+
+    printf("roll: %f, pitch: %f\n", roll_est, pitch_est);
+}
 
 
 void init_io(void)
@@ -27,7 +71,7 @@ void init_io(void)
     PORTF.PIN4CTRL |= PORT_ISC_RISING_gc | PORT_OPC_PULLDOWN_gc;
     PORTF.INTCTRL |= PORT_INT0LVL_LO_gc;
 
-    PORTF.DIRCLR = PIN5_bm;      /* accl int */
+    PORTF.DIRCLR = PIN5_bm;      /* accel int */
     PORTF.INT1MASK |= PIN5_bm;
     PORTF.PIN5CTRL |= PORT_ISC_RISING_gc | PORT_OPC_PULLDOWN_gc;
     PORTF.INTCTRL |= PORT_INT1LVL_LO_gc;
@@ -71,7 +115,7 @@ int main(void)
     unsigned char light_count = 0;
 
     IMU_GYRO_RESULT_t g_rev;
-    IMU_ACCL_RESULT_t a_rev;
+    IMU_ACCEL_RESULT_t a_rev;
 
     
     clock_pll_init();
@@ -98,7 +142,23 @@ int main(void)
     qd_init();
     
     imu_init();
-    _delay_ms(200);
+    tilt_init(&roll_tilt_state, 0.0998, 0.3, 0.003, 0.001);
+    tilt_init(&pitch_tilt_state, 0.0998, 0.3, 0.003, 0.001);
+    tilt_init(&yaw_tilt_state, 0.0998, 0.3, 0.003, 0.001);
+
+    
+    
+    _delay_ms(10);
+    
+    do {} while (gyro_updated && accel_updated);
+    
+    imu_gyro_read(&g_rev);
+    imu_accel_read(&a_rev);
+    gyro_updated = 0;
+    accel_updated = 0;
+    
+    // roll_est = atan2(a_rev.y, a_rev.z);
+    // pitch_est = atan2(a_rev.x, a_rev.z);
     
     for (;;)
     {
@@ -106,6 +166,7 @@ int main(void)
         {
             rtc_flag = 0;
 
+            /*
             light_count++;
             if ((light_count & 0x0f) == 0x0a)
             {
@@ -115,38 +176,38 @@ int main(void)
             {
                 PORTE.OUTSET = PIN7_bm;
             }
+            */
         }
 
         if (gyro_updated)
         {
             gyro_updated = 0;
 
+            if (accel_updated)
             imu_gyro_read(&g_rev);
 
-            printf("gyro:%d|%d|%d\n", g_rev.x, g_rev.y, g_rev.z);
+            // printf("gyro:%d|%d|%d\n", g_rev.x, g_rev.y, g_rev.z);
+
+            imu_filter(&g_rev, &a_rev);
         }
 
-        if (accl_updated)
+        if (accel_updated)
         {
-            accl_updated = 0;
+            accel_updated = 0;
 
-            imu_accl_read(&a_rev);
-            // imu_read_reg(IMU_ACCL_ADDR, IMU_ACCL_HPF_RST);
+            imu_accel_read(&a_rev);
+            // imu_read_reg(IMU_ACCEL_ADDR, IMU_ACCEL_HPF_RST);
 
-            printf("accl:%d|%d|%d|%d\n", a_rev.x>>4, a_rev.y>>4, a_rev.z>>4, QD_READ());
+            // printf("accel:%d|%d|%d|%d\n", a_rev.x>>4, a_rev.y>>4, a_rev.z>>4, QD_READ());
         }
 
-        if (1)
-        {
-            PORTE.OUTSET = PIN6_bm | PIN5_bm;
-        }
         
         if (1)
         {
             uart_process_tick(&Q_BT, &LB_BT, uart_process_lb_bt, STX, ETX);
         }
         
-        if (1)
+        if (0)
         {
             // SLEEP.CTRL = SLEEP_SEN_bm | SLEEP_SMODE_PSAVE_gc;
             SLEEP.CTRL = SLEEP_SEN_bm | SLEEP_SMODE_IDLE_gc;
