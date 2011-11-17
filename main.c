@@ -8,6 +8,7 @@
 #include "tilt.h"
 
 #define DEG_RAD_OP (3.14159265359 / 180.0)
+#define RAD_REG_OP (180.0 / 3.14159265359)
 
 float gyro_x, gyro_y, gyro_z;
 float accel_x, accel_y, accel_z;
@@ -33,9 +34,9 @@ void imu_filter(IMU_GYRO_RESULT_t* g_rev, IMU_ACCEL_RESULT_t* a_rev)
     yaw = atan2(a_rev->x, a_rev->y);
 
     
-    roll_rate = g_rev->x * DEG_RAD_OP;
-    pitch_rate = g_rev->y * DEG_RAD_OP;
-    yaw_rate = g_rev->z * DEG_RAD_OP;
+    roll_rate = g_rev->x * DEG_RAD_OP / 1000;
+    pitch_rate = g_rev->y * DEG_RAD_OP / 1000;
+    yaw_rate = g_rev->z * DEG_RAD_OP / 1000;
 
     
     tilt_state_update(&roll_tilt_state, roll_rate);
@@ -48,9 +49,9 @@ void imu_filter(IMU_GYRO_RESULT_t* g_rev, IMU_ACCEL_RESULT_t* a_rev)
 
     tilt_state_update(&yaw_tilt_state, yaw_rate);
     tilt_kalman_update(&yaw_tilt_state, yaw);
-    // yaw_est = tilt_get_angle(&yaw_tilt_state);
+    yaw_est = tilt_get_angle(&yaw_tilt_state);
 
-    printf("roll: %f, pitch: %f\n", roll_est, pitch_est);
+    printf("tilt:%f,%f,%f\n", roll_est, pitch_est,yaw_est);
 }
 
 
@@ -142,11 +143,9 @@ int main(void)
     qd_init();
     
     imu_init();
-    tilt_init(&roll_tilt_state, 0.0998, 0.3, 0.003, 0.001);
-    tilt_init(&pitch_tilt_state, 0.0998, 0.3, 0.003, 0.001);
-    tilt_init(&yaw_tilt_state, 0.0998, 0.3, 0.003, 0.001);
-
-    
+    tilt_init(&roll_tilt_state, 0.1, 0.3, 0.003, 0.001);
+    tilt_init(&pitch_tilt_state, 0.1, 0.3, 0.003, 0.001);
+    tilt_init(&yaw_tilt_state, 0.1, 0.3, 0.003, 0.001);    
     
     _delay_ms(10);
     
@@ -182,19 +181,17 @@ int main(void)
         if (gyro_updated)
         {
             gyro_updated = 0;
-
-            if (accel_updated)
             imu_gyro_read(&g_rev);
-
             // printf("gyro:%d|%d|%d\n", g_rev.x, g_rev.y, g_rev.z);
 
-            imu_filter(&g_rev, &a_rev);
+            if (accel_updated)
+                imu_filter(&g_rev, &a_rev);
         }
 
         if (accel_updated)
         {
             accel_updated = 0;
-
+            
             imu_accel_read(&a_rev);
             // imu_read_reg(IMU_ACCEL_ADDR, IMU_ACCEL_HPF_RST);
 
@@ -207,7 +204,7 @@ int main(void)
             uart_process_tick(&Q_BT, &LB_BT, uart_process_lb_bt, STX, ETX);
         }
         
-        if (0)
+        if (1)
         {
             // SLEEP.CTRL = SLEEP_SEN_bm | SLEEP_SMODE_PSAVE_gc;
             SLEEP.CTRL = SLEEP_SEN_bm | SLEEP_SMODE_IDLE_gc;
