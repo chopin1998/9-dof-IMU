@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 
 import sys
@@ -7,7 +7,7 @@ import math
 from PyQt4 import QtCore, QtGui, QtOpenGL
 from OpenGL import GL
 import random
-
+import time
 import serial
 
 
@@ -34,7 +34,8 @@ class Window(QtGui.QWidget):
 
         self.setWindowTitle("imu collector")
         
-        self.startTimer(5)
+        self.startTimer(2)
+        
 
     def init_dev(self):
         try:
@@ -59,11 +60,12 @@ class Window(QtGui.QWidget):
             print 'unknow data', raw
     
     def process_data(self, data):
+        
         x, y, z = data
         x *= self.RAD_REG_OP
         y *= self.RAD_REG_OP
         
-        print x, y
+        print time.time(), '\t', x, y
         self.glWidget.setXRotation(x)
         self.glWidget.setYRotation(y)
     

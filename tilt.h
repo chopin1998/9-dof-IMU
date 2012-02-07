@@ -6,18 +6,15 @@ typedef struct _tilt tilt;
 
 struct _tilt
 {
-    // Two states, angle and gyro bias. Unbiased angular rate is a byproduct.
     float bias;
     float rate;
     float angle;
 
-    // Covariance of estimation error matrix.
     float P_00;
     float P_01;
     float P_10;
     float P_11;
 
-    // State constants.
     float dt;
     float R_angle;
     float Q_gyro;

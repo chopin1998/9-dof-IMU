@@ -47,11 +47,11 @@ void imu_filter(IMU_GYRO_RESULT_t* g_rev, IMU_ACCEL_RESULT_t* a_rev)
     tilt_kalman_update(&pitch_tilt_state, pitch);
     pitch_est = tilt_get_angle(&pitch_tilt_state);
 
-    tilt_state_update(&yaw_tilt_state, yaw_rate);
-    tilt_kalman_update(&yaw_tilt_state, yaw);
-    yaw_est = tilt_get_angle(&yaw_tilt_state);
+    // tilt_state_update(&yaw_tilt_state, yaw_rate);
+    // tilt_kalman_update(&yaw_tilt_state, yaw);
+    // yaw_est = tilt_get_angle(&yaw_tilt_state);
 
-    printf("tilt:%f,%f,%f\n", roll_est, pitch_est,yaw_est);
+    printf("tilt:%f,%f,%f\n", roll_est, pitch_est, yaw_est);
 }
 
 
@@ -143,9 +143,10 @@ int main(void)
     qd_init();
     
     imu_init();
-    tilt_init(&roll_tilt_state, 0.1, 0.3, 0.003, 0.001);
-    tilt_init(&pitch_tilt_state, 0.1, 0.3, 0.003, 0.001);
-    tilt_init(&yaw_tilt_state, 0.1, 0.3, 0.003, 0.001);    
+    // void tilt_init(tilt *self, float dt, float R_angle, float Q_gyro, float Q_angle)
+    tilt_init(&roll_tilt_state, 0.25, 0.225, 0.003, 0.001);
+    tilt_init(&pitch_tilt_state, 0.25, 0.225, 0.003, 0.001);
+    tilt_init(&yaw_tilt_state, 0.25, 0.225, 0.003, 0.001);    
     
     _delay_ms(10);
     
